@@ -47,13 +47,9 @@ public:
 
     JsonValue& value() { return _value; }
 
-
-    static JsonValue array(const std::initializer_list<Json> &list) {
-        return JsonValue(std::vector<Json>(list));
-    }
-
-    static JsonValue array() {
-        return JsonValue(std::vector<Json>());
+    template <typename ...Args>
+    static JsonValue array(Args &&...elems) {
+        return JsonValue(std::vector<Json>{std::forward<Args>(elems)...});
     }
 
     friend std::ostream& operator<<(std::ostream &os, Json &json) {
@@ -61,9 +57,16 @@ public:
         return os;
     }
 
-    bool isString() { return _value._what == 3; } // FIXME: HARD CODE
+    template <typename T>
+    bool is() const { return _value.is<T>(); }
 
-    bool contains(const StringImpl &index) {
+    template <typename T>
+    T& as()  { return _value.get<T>(); }
+
+    template <typename T>
+    operator T() { return as<T>(); }
+
+    bool contains(const StringImpl &index) const {
         return _value.get<ObjectImpl>().count(index);
     }
 
@@ -71,21 +74,27 @@ public:
         return _value.get<ObjectImpl>()[index];
     }
 
-    size_t size() {
+    size_t size() const {
         return _value.get<ObjectImpl>().size();
     }
     
-    size_t arraySize() {
+    size_t arraySize() const {
         return _value.get<ArrayImpl>().size();
     }
 
-    void pushBack(const Json &json) {
+    void append(const Json &json) {
         _value.get<ArrayImpl>().emplace_back(json);
     }
+
 private:
     JsonValue _value;
 };
 
+template <>
+bool Json::is<bool>() const { return _value.is<BooleanImpl>(); }
+
+template <>
+bool Json::is<nullptr_t>() const { return _value.is<NullImpl>(); }
 
 
 std::ostream& operator<<(std::ostream &os, ArrayImpl &vec) {
@@ -93,10 +102,10 @@ std::ostream& operator<<(std::ostream &os, ArrayImpl &vec) {
     if(vec.size() > 0) {
         auto last = --vec.end();
         for(auto it = vec.begin(); it != last; ++it) {
-            if(it->isString()) os << '\"' << *it << "\", ";
+            if(it->is<StringImpl>()) os << '\"' << *it << "\", ";
             else os << *it << ", ";
         }
-        if(last->isString()) os << '\"' << *last << '\"';
+        if(last->is<StringImpl>()) os << '\"' << *last << '\"';
         else os << *last;
     }
     os << ']';
@@ -108,13 +117,13 @@ std::ostream& operator<<(std::ostream &os, ObjectImpl &map) {
     if(map.size() > 0) {
         auto last = --map.end();
         for(auto it = map.begin(); it != last; ++it) {
-            os << '\"' << it->first << "\": ";
-            if(it->second.isString()) os << '\"' << it->second << "\", ";
+            os << '\"' << it->first << "\" : ";
+            if(it->second.is<StringImpl>()) os << '\"' << it->second << "\", ";
             else os << it->second << ", ";
         }
         
-        os << '\"' << last->first << "\": ";
-        if(last->second.isString()) os << '\"' << last->second << '\"';
+        os << '\"' << last->first << "\" : ";
+        if(last->second.is<StringImpl>()) os << '\"' << last->second << '\"';
         else os << last->second;
     }
     os << '}';

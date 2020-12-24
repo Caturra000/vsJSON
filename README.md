@@ -16,11 +16,11 @@
 int main() {
     // 静态构造
     Json json {
-        {"index0", Json::array({1, 2, "3", true})},
+        {"index0", Json::array(1, 2, "3", true)},
         {"index1", false},
         {"index2", Json {
             {"index2-1", nullptr}
-        }},
+        }}
     };
 
     // 直接输出
@@ -35,12 +35,15 @@ int main() {
 
     // 按index访问/append
     json["index3"] = 5;
-    json["index0"].pushBack(false);
+    json["index0"].append(false);
     std::cout << json << std::endl;
 
     // 重新赋值
     json = nullptr;
     std::cout << json << std::endl;
+
+    // 判断类型
+    std::cout << (json.is<nullptr_t>() ? "true" : "false") << std::endl;
 
     // 简单parser
     auto toJson = R"(
@@ -56,7 +59,7 @@ int main() {
             "index3": 5
         }
     )";
-    auto json2 = parseJson(toJson);
+    auto json2 = parse(toJson);
 
     std::cout << json2 << std::endl;
 

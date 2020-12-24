@@ -42,7 +42,7 @@ struct DeleteVisitor {
     DeleteVisitor(Variant<Types...> &self): self(self) {}
     template <typename T>
     ReturnType operator()(const T &) {
-        reinterpret_cast<T*>(self._handle)->~T();
+        reinterpret_cast<T*>(self.handle())->~T();
     }
 };
 
@@ -62,25 +62,18 @@ struct OsVisitor {
     template <typename T>
     std::enable_if_t<!HasOperatorLeftShift<T>::value, 
     ReturnType> operator()(T &obj) { 
-        std::cerr << typeid(obj).name() << std::endl;
-        throw std::runtime_error("do not support operator()");
+        throw std::runtime_error("[type]" + std::string(typeid(obj).name()) 
+            + " do not support IO");
         return _os;
     }
 };
 
 template <typename ...Types>
 class Variant {
-public:
+private:
     int _what;
     char _handle[MaxSize<Types...>::size];
     
-    template<typename T>
-	void init(const T &obj) { // TODO2 &&
-        _what = Position<T, Types...>::pos;
-        // std::cout << "[what] " << _what << std::endl;
-		new(_handle) T(obj);
-	}
-
 public:
     Variant() {
         _what = -1;
@@ -98,7 +91,6 @@ public:
         CopyConstructVisitor<Types...> ccv(*this);
         const_cast<Variant&>(rhs).visit(ccv);
     }
-
 
     template <typename T>
     Variant& operator=(const T &rhs) {
@@ -140,6 +132,11 @@ public:
         return get<T>();
     }
 
+    template <typename T>
+    bool is() const {
+        return Position<T, Types...>::pos == _what;
+    }
+
     template <typename Visitor>
     typename Visitor::ReturnType visit(Visitor &visitor) {
         return RuntimeChoose<0, sizeof...(Types)-1, Types...>
@@ -150,6 +147,15 @@ public:
         OsVisitor osv(os);
         return variant.visit(osv);
     }
+
+    int what() const { return _what; }
+    char* handle() { return _handle; }
+
+    template<typename T>
+	void init(const T &obj) { // TODO2 &&
+        _what = Position<T, Types...>::pos;
+		new(_handle) T(obj);
+	}
 };
 
 // template <typename T>
