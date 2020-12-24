@@ -15,7 +15,8 @@
 
 int main() {
     // 静态构造
-    Json json {
+    Json json =
+    {
         {"index0", Json::array(1, 2, "3", true)},
         {"index1", false},
         {"index2", Json {
