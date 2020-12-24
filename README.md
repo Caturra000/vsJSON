@@ -65,7 +65,18 @@ int main() {
     return 0;
 }
 ```
+## 设计理念
 
+长话短说
+
+0. 我觉得`visitor`非常适合json库的设计，但是找遍了github也没找到，因此想造轮子
+1. 使用舒适的json库很重要，因此需要一个看起来足够json，用起来又很C++的json库
+2. 符合2要求的有一个著名的库，但是实现太长了
+3. 造轮子还需要理由？
+
+[关于variant和visitor的使用示例](https://zhuanlan.zhihu.com/p/57530780)
+
+稍后我会更新关于variant的实现细节，以及展示从variant到json的实现过程
 
 ## TODO
 
