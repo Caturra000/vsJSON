@@ -17,11 +17,8 @@ int main() {
     std::cout << json << std::endl;
 
     // 简单序列化
-    std::stringstream ss;
-    ss << json;
-    std::string serializer;
-    std::getline(ss, serializer, '\0');
-    std::cout << serializer << std::endl;
+    std::string serial = json.dump();
+    std::cout << serial << std::endl;
 
     // 按index访问/append
     json["index3"] = 5;

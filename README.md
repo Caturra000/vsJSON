@@ -1,10 +1,10 @@
 # vsJSON
 
-有空再详细写
+## TL;DR
 
-大意就是一个600行不到的JSON库
+一个600行不到的JSON库，基于C++14实现，无任何依赖
 
-利用`variant`、`visitor`、`template`和`stream`打造出来的一个好玩又好看的玩具
+利用`variant`、`visitor`、`template`和`stream`打造出来的一个好玩又好看的轮子
 
 ## 大概用法
 
@@ -27,11 +27,8 @@ int main() {
     std::cout << json << std::endl;
 
     // 简单序列化
-    std::stringstream ss;
-    ss << json;
-    std::string serializer;
-    std::getline(ss, serializer, '\0');
-    std::cout << serializer << std::endl;
+    std::string serial = json.dump();
+    std::cout << serial << std::endl;
 
     // 按index访问/append
     json["index3"] = 5;
