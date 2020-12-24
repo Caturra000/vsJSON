@@ -63,9 +63,6 @@ public:
     template <typename T>
     T& as()  { return _value.get<T>(); }
 
-    template <typename T>
-    operator T() { return as<T>(); }
-
     bool contains(const StringImpl &index) const {
         return _value.get<ObjectImpl>().count(index);
     }
