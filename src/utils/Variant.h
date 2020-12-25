@@ -42,7 +42,7 @@ struct DeleteVisitor {
     DeleteVisitor(Variant<Types...> &self): self(self) {}
     template <typename T>
     ReturnType operator()(const T &) {
-        reinterpret_cast<T*>(self.handle())->~T();
+        ((T*)self.handle())->~T();
     }
 };
 
@@ -149,7 +149,7 @@ public:
     }
 
     int what() const { return _what; }
-    char* handle() { return _handle; }
+    const char* handle() { return _handle; }
 
     template<typename T>
 	void init(const T &obj) { // TODO2 &&
