@@ -67,12 +67,10 @@ int main() {
 ```
 ## 设计理念
 
-长话短说
-
-0. 我觉得`visitor`非常适合json库的设计，但是找遍了github也没找到，因此想造轮子
-1. 使用舒适的json库很重要，因此需要一个看起来足够json，用起来又很C++的json库
-2. 符合2要求的有一个著名的库，但是实现太长了
-3. 造轮子还需要理由？
+0. 我觉得`visitor/variant`非常适合json库的设计：`visitor`可以避免类型的枚举，套上`template`甚至一劳永逸，而`variant`又可表示（返回）多个类型，可以在`parse`阶段大量简化代码量，并且在`JSON`类设计中也可更加抽象地表示出来，但是github上没找到类似的实现，于是想造轮子
+1. 使用舒适的json库很重要，因此需要一个看起来足够`JSON`，用起来又很`C++`的`JSON`库：`vsJSON`虽然重复造了`Variant`（`std::variant`需要`C++17`），但是`Json`中的容器是复用STL提供的`std::map`和`std::vector`，使用上并不需要多余的学习成本；另外`Json`类支持的`std::initiliazer_list`构造方式非常直观，并且从语言层面来保证`Json`的格式是正确的
+2. 符合1要求的有一个著名的库，但是实现太长了
+3. 造轮子其实不需要理由
 
 [关于variant和visitor的使用示例](https://zhuanlan.zhihu.com/p/57530780)
 
@@ -82,3 +80,4 @@ int main() {
 
 - 美化格式
 - 完善parser
+- `rvalue`支持
