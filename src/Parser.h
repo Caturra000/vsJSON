@@ -1,7 +1,7 @@
 #ifndef __JSON_PARSER_H__
 #define __JSON_PARSER_H__
 #include <bits/stdc++.h>
-#include "Parser.h"
+#include "Json.h"
 
 Json parse(const char *&p);
 StringImpl parseString(const char *&p);
