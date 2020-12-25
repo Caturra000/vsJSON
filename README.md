@@ -36,12 +36,19 @@ int main() {
     json["index0"].append(false);
     std::cout << json << std::endl;
 
+    // 提供STL复用的迭代器
+    auto &obj = json.as<std::map<std::string, Json>>();
+    for(auto &&iter : obj) {
+        std::cout << iter.first << ' ' << iter.second << std::endl;
+    }
+
     // 重新赋值
     json = nullptr;
     std::cout << json << std::endl;
 
     // 判断类型
-    std::cout << (json.is<nullptr_t>() ? "true" : "false") << std::endl;
+    bool isNull = json.is<nullptr_t>();
+    std::cout << (isNull ? "true" : "false") << std::endl;
 
     // 简单parser
     auto toJson = R"(
