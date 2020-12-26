@@ -24,6 +24,7 @@ int main() {
     json["index3"] = 5;
     json["index0"].append(false);
     std::cout << json << std::endl;
+    std::cout << json["index0"][4] << std::endl;
 
     // 提供STL复用的迭代器
     auto &obj = json.as<std::map<std::string, Json>>();

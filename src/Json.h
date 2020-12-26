@@ -71,6 +71,10 @@ public:
         return _value.get<ObjectImpl>()[index];
     }
 
+    Json& operator[](size_t index) {
+        return _value.get<ArrayImpl>()[index];
+    }
+
     size_t size() const {
         return _value.get<ObjectImpl>().size();
     }
