@@ -3,12 +3,20 @@
 #include <bits/stdc++.h>
 #include "Json.h"
 
-Json parse(const char *&p);
-StringImpl parseString(const char *&p);
-Json parseObject(const char *&p);
-Json parseArray(const char *&p);
-IntegerImpl parseInteger(const char *&p);
-DecimalImpl parseDeciaml(const char *&p);
+namespace ParserImpl {
+    Json parseImpl(const char *&p);
+    StringImpl parseString(const char *&p);
+    Json parseObject(const char *&p);
+    Json parseArray(const char *&p);
+    IntegerImpl parseInteger(const char *&p);
+    DecimalImpl parseDeciaml(const char *&p);
+}
+
+inline Json parse(const char *p) {
+    return ParserImpl::parseImpl(p);
+}
+
+namespace ParserImpl {
 
 inline bool isWhitespace(char ch) {
     return ch == ' ' || ch == '\n' || ch == '\t';
@@ -18,7 +26,7 @@ inline const char* skipWhiteSpace(const char *p) {
     return p;
 }
 
-inline Json parse(const char *&p) {
+inline Json parseImpl(const char *&p) {
     p = skipWhiteSpace(p);
     switch (*p) {
         case '{':
@@ -73,7 +81,7 @@ inline Json parseObject(const char *&p) {
         if(*p != ':') ; // throw
         ++p; // :
         p = skipWhiteSpace(p);
-        object[key] = parse(p);
+        object[key] = parseImpl(p);
         p = skipWhiteSpace(p);
         if(*p == '}') {
             ++p;
@@ -97,7 +105,7 @@ inline Json parseArray(const char *&p) {
     }
     for(;;) {
         p = skipWhiteSpace(p);
-        auto r = parse(p);
+        auto r = parseImpl(p);
         array.append(r);
         p = skipWhiteSpace(p);
         if(*p == ']') {
@@ -143,4 +151,6 @@ inline DecimalImpl parseDeciaml(const char *&p) {
     if(!p) ;
     return d;
 }
+
+} // ParserImpl
 #endif
