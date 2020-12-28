@@ -2,6 +2,11 @@
 #include "Json.h"
 #include "Parser.h"
 
+struct Point {
+    int x, y, z;
+    operator Json() { return Json::array(x, y, z); }
+};
+
 int main() {
 
     // 静态构造
@@ -20,9 +25,9 @@ int main() {
     std::string serial = json.dump();
     std::cout << serial << std::endl;
 
-    // 按index访问/append
+    // 按index访问 / append / 任意类型转为Json
     json["index3"] = 5;
-    json["index0"].append(false);
+    json["index0"].append(Point {998, 244, 353});
     std::cout << json << std::endl;
     std::cout << json["index0"][4] << std::endl;
 
