@@ -12,10 +12,14 @@ namespace ParserImpl {
     DecimalImpl parseDeciaml(const char *&p);
 }
 
+
+
 inline Json parse(const char *p) {
     return ParserImpl::parseImpl(p);
 }
-
+inline Json parse(const std::string &str) {
+    return parse(str.data());
+}
 namespace ParserImpl {
 
 inline bool isWhitespace(char ch) {
