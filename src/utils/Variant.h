@@ -152,10 +152,10 @@ public:
     const char* handle() { return _handle; }
 
     template<typename T>
-	void init(const T &obj) { // TODO2 &&
+    void init(const T &obj) { // TODO2 &&
         _what = Position<T, Types...>::pos;
-		new(_handle) T(obj);
-	}
+        new(_handle) T(obj);
+    }
 };
 
 // template <typename T>
