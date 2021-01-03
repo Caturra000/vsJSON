@@ -90,9 +90,7 @@ public:
     std::string dump() {
         std::stringstream ss;
         ss << (*this);
-        std::string serializer;
-        std::getline(ss, serializer, '\0');
-        return serializer;
+        return ss.str();
     }
 
 private:
