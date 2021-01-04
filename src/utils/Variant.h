@@ -92,21 +92,26 @@ public:
         const_cast<Variant&>(rhs).visit(ccv);
     }
 
-    template <typename T>
-    Variant& operator=(const T &rhs) {
-        this->~Variant();
-        init(rhs);
-        return *this;
-    }
-
     void swap(Variant &rhs) {
         std::swap(_what, rhs._what);
         std::swap(_handle, rhs._handle);
     }
 
+    template <typename T>
+    Variant& operator=(T &&rhs) {
+        Variant(std::forward<T>(rhs)).swap(*this);
+        return *this;
+    }
+
     Variant& operator=(const Variant &rhs){
         if(this == &rhs) return *this;
         Variant(rhs).swap(*this);
+        return *this;
+    }
+
+    Variant& operator=(Variant &&rhs) {
+        rhs.swap(*this);
+        Variant().swap(rhs);
         return *this;
     }
 
