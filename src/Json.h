@@ -10,6 +10,8 @@
 class Json {
 public:
 
+    Json() = default;
+
     template <typename ...Args>
     Json(Args &&...args): _value(std::forward<Args>(args)...) { }
 
@@ -19,16 +21,35 @@ public:
     Json(bool b): _value(Boolean(b)) {}
     Json(nullptr_t): _value(NullImpl(nullptr)) {}
 
+    Json(const Json &rhs): _value(rhs._value) {}
+    Json(Json &&rhs): _value(std::move(rhs._value)) {}
 
     Json(const std::initializer_list<ObjectImpl::value_type> &list)
         : _value(ObjectImpl(list)) { }
 
+
+    void swap(Json &rhs) {
+        _value.swap(rhs._value);
+    }
+
     template <typename T>
-    Json& operator=(const T& obj) {
-        _value = obj;
+    Json& operator=(T&& obj) {
+        Json(std::forward<T>(obj)).swap(*this);
         return *this;
     }
 
+    Json& operator=(const Json &rhs) {
+        if(this == &rhs) return *this;
+        Json(rhs).swap(*this);
+        return *this;
+    }
+
+    Json& operator=(Json &&rhs) {
+        rhs.swap(*this);
+        Json().swap(rhs);
+        return *this;
+    }
+    
     template <size_t N>
     Json& operator=(const char (&str)[N]) {
         _value = StringImpl(str);
