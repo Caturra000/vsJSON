@@ -91,11 +91,12 @@ public:
         memset(_handle, 0, sizeof _handle);
     }
 
-    template <typename T>
-    Variant(const T &obj) { 
-        static_assert(Position<T, Types...>::pos != -1,
+    template <typename T,
+    typename = std::enable_if_t<!std::is_same<std::decay_t<T>, Variant>::value>>
+    Variant(T &&obj) { 
+        static_assert(Position<std::decay_t<T>, Types...>::pos != -1,
             "type not found");
-        init(obj);
+        init(std::forward<T>(obj));
     }
 
     Variant(const Variant &rhs) {
@@ -115,7 +116,8 @@ public:
         std::swap(_handle, rhs._handle);
     }
 
-    template <typename T>
+    template <typename T,
+    typename = std::enable_if_t<!std::is_same<std::decay_t<T>, Variant>::value>>
     Variant& operator=(T &&rhs) {
         Variant(std::forward<T>(rhs)).swap(*this);
         return *this;
