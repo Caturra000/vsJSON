@@ -36,6 +36,17 @@ struct CopyConstructVisitor {
 };
 
 template <typename ...Types>
+struct MoveConstructVisitor {
+    using ReturnType = void;
+    Variant<Types...> &lhs;
+    MoveConstructVisitor(Variant<Types...> &lhs): lhs(lhs) { }
+    template <typename T>
+    ReturnType operator()(T &obj) {
+        lhs.init(std::move(obj));
+    }
+};
+
+template <typename ...Types>
 struct DeleteVisitor {
     using ReturnType = void;
     Variant<Types...> &self;
@@ -90,6 +101,13 @@ public:
     Variant(const Variant &rhs) {
         CopyConstructVisitor<Types...> ccv(*this);
         const_cast<Variant&>(rhs).visit(ccv);
+    }
+
+    Variant(Variant &&rhs) {
+        MoveConstructVisitor<Types...> mcv(*this);
+        rhs.visit(mcv);
+        // rhs._what = -1;
+        // memset(rhs._handle, 0, sizeof(rhs._handle));
     }
 
     void swap(Variant &rhs) {
@@ -157,9 +175,10 @@ public:
     const char* handle() { return _handle; }
 
     template<typename T>
-    void init(const T &obj) { // TODO2 &&
-        _what = Position<T, Types...>::pos;
-        new(_handle) T(obj);
+    void init(T &&obj) {
+        using DecayT = std::decay_t<T>;
+        _what = Position<DecayT, Types...>::pos;
+        new(_handle) DecayT(std::forward<T>(obj));
     }
 };
 
