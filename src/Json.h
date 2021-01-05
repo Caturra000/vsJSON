@@ -27,26 +27,34 @@ public:
     Json(const std::initializer_list<ObjectImpl::value_type> &list)
         : _value(ObjectImpl(list)) { }
 
+    Json(std::initializer_list<ObjectImpl::value_type> &&list)
+        : _value(ObjectImpl(std::move(list))) { }
 
+
+    // FIXME: use swap on operator=
     void swap(Json &rhs) {
-        _value.swap(rhs._value);
+        std::swap(*this, rhs);
     }
 
-    template <typename T>
+    template <typename T,
+    typename = std::enable_if_t<!std::is_same<std::decay_t<T>, Json>::value>>
     Json& operator=(T&& obj) {
-        Json(std::forward<T>(obj)).swap(*this);
+        this->~Json();
+        _value = std::forward<T>(obj);
         return *this;
     }
 
     Json& operator=(const Json &rhs) {
         if(this == &rhs) return *this;
-        Json(rhs).swap(*this);
+        this->~Json();
+        _value = rhs._value;
         return *this;
     }
 
     Json& operator=(Json &&rhs) {
-        rhs.swap(*this);
-        Json().swap(rhs);
+        if(this == &rhs) return *this;
+        this->~Json();
+        _value = std::move(rhs._value);
         return *this;
     }
     

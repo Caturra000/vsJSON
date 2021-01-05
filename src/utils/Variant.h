@@ -111,27 +111,33 @@ public:
         // memset(rhs._handle, 0, sizeof(rhs._handle));
     }
 
+    // DO NOT IMPLEMENT operator= BY SWAP(swap for placement new buffer is wrong)
+    // reverse case : implements swap by operator=&&
     void swap(Variant &rhs) {
-        std::swap(_what, rhs._what);
-        std::swap(_handle, rhs._handle);
+       std::swap(*this, rhs);
     }
 
     template <typename T,
     typename = std::enable_if_t<!std::is_same<std::decay_t<T>, Variant>::value>>
     Variant& operator=(T &&rhs) {
-        Variant(std::forward<T>(rhs)).swap(*this);
+        this->~Variant();
+        init(std::forward<T>(rhs));
         return *this;
     }
 
     Variant& operator=(const Variant &rhs){
         if(this == &rhs) return *this;
-        Variant(rhs).swap(*this);
+        this->~Variant();
+        CopyConstructVisitor<Types...> ccv(*this);
+        const_cast<Variant&>(rhs).visit(ccv);
         return *this;
     }
 
     Variant& operator=(Variant &&rhs) {
-        rhs.swap(*this);
-        Variant().swap(rhs);
+        if(this == &rhs) return *this;
+        this->~Variant();
+        MoveConstructVisitor<Types...> ccv(*this);
+        rhs.visit(ccv);
         return *this;
     }
 
