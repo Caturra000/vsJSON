@@ -16,6 +16,11 @@
 struct Point {
     int x, y, z;
     operator Json() { return Json::array(x, y, z); }
+    Point(int x, int y, int z): x(x), y(y), z(z) {}
+    Point(const Json &json)
+        : x(json[0].to<int>()),
+          y(json[1].to<int>()),
+          z(json[2].to<int>()) {}
 };
 
 int main() {
@@ -42,6 +47,8 @@ int main() {
     json["index0"].append(Point {998, 244, 353});
     std::cout << json << std::endl;
     std::cout << json["index0"][4] << std::endl;
+    Point p = json["index0"][4];
+    std::cout << p.x << ' ' << p.y << ' ' << p.z << std::endl;
 
     // 提供STL复用的迭代器
     auto &obj = json.as<std::map<std::string, Json>>();

@@ -82,18 +82,14 @@ struct OsVisitor {
 template <typename U>
 struct ConvertVisitor {
     using ReturnType = U;
-
     template <typename T>
     std::enable_if_t<std::is_convertible<T, U>::value,
-    ReturnType> operator()(T &obj) {
-        return obj;
-    }
-
+    ReturnType> operator()(T &obj) { return obj; }
     template <typename T>
     std::enable_if_t<!std::is_convertible<T, U>::value,
     ReturnType> operator()(T &obj) {
-        throw std::runtime_error("[type]" + std::string(typeid(obj).name()) 
-            + " does not support convert to [type]" + std::string(typeid(U).name())); 
+        throw std::runtime_error("[type]" + std::string(typeid(obj).name())
+            + " does not support convert to [type]" + std::string(typeid(U).name()));
         return U{};
     }
 };
@@ -101,18 +97,14 @@ struct ConvertVisitor {
 template <typename U>
 struct MovedConvertVisitor {
     using ReturnType = U;
-
     template <typename T>
     std::enable_if_t<std::is_convertible<T, U>::value,
-    ReturnType> operator()(T &obj) {
-        return std::move(obj);
-    }
-
+    ReturnType> operator()(T &obj) { return std::move(obj); }
     template <typename T>
     std::enable_if_t<!std::is_convertible<T, U>::value,
     ReturnType> operator()(T &obj) {
-        throw std::runtime_error("[type]" + std::string(typeid(obj).name()) 
-            + " does not support moved convert to [type]" + std::string(typeid(U).name())); 
+        throw std::runtime_error("[type]" + std::string(typeid(obj).name())
+            + " does not support moved convert to [type]" + std::string(typeid(U).name()));
         return U{};
     }
 };
@@ -198,7 +190,7 @@ public:
 
     template <typename T>
     const T& get() const {
-        return get<T>();
+        return const_cast<Variant*>(this)->get<T>();
     }
 
     template <typename T>
@@ -210,6 +202,11 @@ public:
     T to() & {
         ConvertVisitor<T> cv;
         return visit(cv);
+    }
+
+    template <typename T>
+    T to() const & {
+        return const_cast<Variant*>(this)->to<T>();
     }
 
     template <typename T>

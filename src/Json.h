@@ -92,6 +92,12 @@ public:
     template <typename T>
     T& as()  { return _value.get<T>(); }
 
+    template <typename T>
+    T to() const & { return _value.to<T>(); }
+
+    template <typename T>
+    T to() && { return std::move(_value).to<T>(); }
+
     bool contains(const StringImpl &index) const {
         return _value.get<ObjectImpl>().count(index);
     }
@@ -101,6 +107,10 @@ public:
     }
 
     Json& operator[](size_t index) {
+        return _value.get<ArrayImpl>()[index];
+    }
+
+    const Json& operator[](size_t index) const {
         return _value.get<ArrayImpl>()[index];
     }
 
