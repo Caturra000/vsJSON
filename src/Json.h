@@ -4,8 +4,7 @@
 #include "utils/Variant.h"
 #include "utils/TypeCompat.h"
 #include "JsonValue.h"
-
-
+namespace vsjson {
 
 class Json {
 public:
@@ -175,4 +174,6 @@ std::ostream& operator<<(std::ostream &os, ObjectImpl &map) {
     os << '}';
     return os;
 }
+
+} // vsjson
 #endif

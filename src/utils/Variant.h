@@ -2,7 +2,7 @@
 #define __JSON_UTILS_VARIANT_H__
 #include <bits/stdc++.h>
 #include "TypeTraits.h"
-
+namespace vsjson {
 
 template <typename ...Types>
 class Variant;
@@ -263,5 +263,5 @@ public:
 //     return os;
 // }
 
-
+} // vsjson
 #endif

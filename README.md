@@ -10,8 +10,8 @@
 
 ```C++
 #include <bits/stdc++.h>
-#include "Json.h"
-#include "Parser.h"
+#include "vsjson.hpp"
+using namespace vsjson;
 
 struct Point {
     int x, y, z;

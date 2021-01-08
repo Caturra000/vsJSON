@@ -2,6 +2,7 @@
 #define __JSON_PARSER_H__
 #include <bits/stdc++.h>
 #include "Json.h"
+namespace vsjson {
 
 namespace ParserImpl {
     Json parseImpl(const char *&p);
@@ -157,4 +158,6 @@ inline DecimalImpl parseDeciaml(const char *&p) {
 }
 
 } // ParserImpl
+
+} // vsjson
 #endif

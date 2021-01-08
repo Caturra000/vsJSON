@@ -1,6 +1,8 @@
 #ifndef __JSON_UTILS_TYPE_TRAITS_H__
 #define __JSON_UTILS_TYPE_TRAITS_H__
 #include <bits/stdc++.h>
+namespace vsjson {
+
 template <typename T, typename ...Ts>
 struct Position {
     constexpr static int pos = -1;
@@ -33,9 +35,6 @@ struct TypeAt<0, T> {
     using Type = T;
 };
 
-
-
-
 struct YesOrNo {
     using Yes = char[1];
     using No = char[2];
@@ -51,4 +50,6 @@ struct HasOperatorLeftShift : YesOrNo {
 
     static bool const value = sizeof( test<T>( nullptr ) ) == sizeof( Yes );
 };
+
+} // vsjson
 #endif

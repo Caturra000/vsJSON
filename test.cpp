@@ -1,12 +1,11 @@
 #include <bits/stdc++.h>
-#include "Json.h"
-#include "Parser.h"
+#include "vsjson.hpp"
 
 struct Point {
     int x, y, z;
-    operator Json() { return Json::array(x, y, z); }
+    operator vsjson::Json() { return vsjson::Json::array(x, y, z); }
     Point(int x, int y, int z): x(x), y(y), z(z) {}
-    Point(const Json &json)
+    Point(const vsjson::Json &json)
         : x(json[0].to<int>()),
           y(json[1].to<int>()),
           z(json[2].to<int>()) {
@@ -17,10 +16,10 @@ struct Point {
 int main() {
 
     // 静态构造
-    Json json {
-        {"index0", Json::array(1, 2, "3", true)},
+    vsjson::Json json {
+        {"index0", vsjson::Json::array(1, 2, "3", true)},
         {"index1", false},
-        {"index2", Json {
+        {"index2", vsjson::Json {
             {"index2-1", nullptr}
         }}
     };
@@ -41,7 +40,7 @@ int main() {
     std::cout << p.x << ' ' << p.y << ' ' << p.z << std::endl;
 
     // 提供STL复用的迭代器
-    auto &obj = json.as<std::map<std::string, Json>>();
+    auto &obj = json.as<std::map<std::string, vsjson::Json>>();
     for(auto &&iter : obj) {
         std::cout << iter.first << ' ' << iter.second << std::endl;
     }
@@ -70,10 +69,10 @@ int main() {
         }
 
     )";
-    auto json2 = parse(toJson);
+    auto json2 = vsjson::parse(toJson);
 
     auto toArrayJson = "[1, 2, false, \"jojo\"]";
-    auto json3 = parse(toArrayJson);
+    auto json3 = vsjson::parse(toArrayJson);
 
     std::cout << json2 << std::endl;
     std::cout << json3 << std::endl;

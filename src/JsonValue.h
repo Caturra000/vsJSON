@@ -3,6 +3,7 @@
 #include <bits/stdc++.h>
 #include "utils/TypeCompat.h"
 #include "utils/Variant.h"
+namespace vsjson {
 
 class Json;
 using NullImpl = Null;
@@ -21,4 +22,6 @@ using JsonValue =
                 IntegerImpl, 
                 DecimalImpl, 
                 BooleanImpl>;
+
+} // vsjson
 #endif

@@ -1,6 +1,8 @@
 #ifndef __JSON_UTILS_TYPE_COMPAT_H__
 #define __JSON_UTILS_TYPE_COMPAT_H__
 #include <bits/stdc++.h>
+namespace vsjson {
+
 struct Boolean {
     bool boolean;
     Boolean() = default;
@@ -24,4 +26,6 @@ struct Null {
         return os;
     }
 };
+
+} // vsjson
 #endif
