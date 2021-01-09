@@ -5,12 +5,11 @@ struct Point {
     int x, y, z;
     operator vsjson::Json() { return vsjson::Json::array(x, y, z); }
     Point(int x, int y, int z): x(x), y(y), z(z) {}
-    Point(const vsjson::Json &json)
-        : x(json[0].to<int>()),
-          y(json[1].to<int>()),
-          z(json[2].to<int>()) {
-        assert(json.arraySize() == 3); 
-    }
+    Point(const std::vector<vsjson::Json> &array)
+        : x(array[0].to<int>()),
+          y(array[1].to<int>()),
+          z(array[2].to<int>()) {}
+    Point() = default;
 };
 
 int main() {
@@ -36,7 +35,7 @@ int main() {
     json["index0"].append(Point {998, 244, 353});
     std::cout << json << std::endl;
     std::cout << json["index0"][4] << std::endl;
-    Point p = json["index0"][4];
+    Point p = json["index0"][4].to<Point>();
     std::cout << p.x << ' ' << p.y << ' ' << p.z << std::endl;
 
     // 提供STL复用的迭代器
