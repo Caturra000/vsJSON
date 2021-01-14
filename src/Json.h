@@ -9,10 +9,10 @@ namespace vsjson {
 class Json {
 public:
 
-    Json() = default;
+    Json(): _value(ObjectImpl()) {}
 
     template <typename ...Args>
-    Json(Args &&...args): _value(std::forward<Args>(args)...) { }
+    Json(Args &&...args): _value(std::forward<Args>(args)...) {}
 
     template <size_t N>
     Json(const char (&str)[N]): _value(StringImpl(str)) {}
@@ -24,10 +24,10 @@ public:
     Json(Json &&rhs): _value(std::move(rhs._value)) {}
 
     Json(const std::initializer_list<ObjectImpl::value_type> &list)
-        : _value(ObjectImpl(list)) { }
+        : _value(ObjectImpl(list)) {}
 
     Json(std::initializer_list<ObjectImpl::value_type> &&list)
-        : _value(ObjectImpl(std::move(list))) { }
+        : _value(ObjectImpl(std::move(list))) {}
 
 
     // FIXME: use swap on operator=
