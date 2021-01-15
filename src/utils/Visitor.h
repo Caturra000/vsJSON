@@ -5,34 +5,34 @@
 #include "VisitorHelper.h"
 namespace vsjson {
 
-template <typename ...Types>
+template <typename ...Ts>
 class Variant;
 
 // lhs = rhs
-template <typename ...Types>
+template <typename ...Ts>
 struct CopyConstructVisitor: public NoReturn {
-    Variant<Types...> &lhs;
-    CopyConstructVisitor(Variant<Types...> &lhs): lhs(lhs) { }
+    Variant<Ts...> &lhs;
+    CopyConstructVisitor(Variant<Ts...> &lhs): lhs(lhs) { }
     template <typename T>
     void operator()(const T &obj) {
         lhs.init(obj);
     }
 };
 
-template <typename ...Types>
+template <typename ...Ts>
 struct MoveConstructVisitor: public NoReturn {
-    Variant<Types...> &lhs;
-    MoveConstructVisitor(Variant<Types...> &lhs): lhs(lhs) { }
+    Variant<Ts...> &lhs;
+    MoveConstructVisitor(Variant<Ts...> &lhs): lhs(lhs) { }
     template <typename T>
     void operator()(T &obj) {
         lhs.init(std::move(obj));
     }
 };
 
-template <typename ...Types>
+template <typename ...Ts>
 struct DeleteVisitor: public NoReturn {
-    Variant<Types...> &self;
-    DeleteVisitor(Variant<Types...> &self): self(self) {}
+    Variant<Ts...> &self;
+    DeleteVisitor(Variant<Ts...> &self): self(self) {}
     template <typename T>
     void operator()(const T &) {
         ((T*)self.handle())->~T();

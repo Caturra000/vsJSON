@@ -21,11 +21,11 @@ struct RuntimeChoose {
     }
 };
 
-template <typename ...Types>
+template <typename ...Ts>
 class Variant {
 private:
     int _what;
-    char _handle[MaxSize<Types...>::size];
+    char _handle[MaxSize<Ts...>::size];
     
 public:
     Variant() {
@@ -36,18 +36,18 @@ public:
     template <typename T,
     typename = std::enable_if_t<!std::is_same<std::decay_t<T>, Variant>::value>>
     Variant(T &&obj) { 
-        static_assert(Position<std::decay_t<T>, Types...>::pos != -1,
+        static_assert(Position<std::decay_t<T>, Ts...>::pos != -1,
             "type not found");
         init(std::forward<T>(obj));
     }
 
     Variant(const Variant &rhs) {
-        CopyConstructVisitor<Types...> ccv(*this);
+        CopyConstructVisitor<Ts...> ccv(*this);
         const_cast<Variant&>(rhs).visit(ccv);
     }
 
     Variant(Variant &&rhs) {
-        MoveConstructVisitor<Types...> mcv(*this);
+        MoveConstructVisitor<Ts...> mcv(*this);
         rhs.visit(mcv);
         // rhs._what = -1;
         // memset(rhs._handle, 0, sizeof(rhs._handle));
@@ -70,7 +70,7 @@ public:
     Variant& operator=(const Variant &rhs){
         if(this == &rhs) return *this;
         this->~Variant();
-        CopyConstructVisitor<Types...> ccv(*this);
+        CopyConstructVisitor<Ts...> ccv(*this);
         const_cast<Variant&>(rhs).visit(ccv);
         return *this;
     }
@@ -78,22 +78,22 @@ public:
     Variant& operator=(Variant &&rhs) {
         if(this == &rhs) return *this;
         this->~Variant();
-        MoveConstructVisitor<Types...> mcv(*this);
+        MoveConstructVisitor<Ts...> mcv(*this);
         rhs.visit(mcv);
         return *this;
     }
 
     ~Variant() {
         if(_what == -1) return;
-        DeleteVisitor<Types...> dv(*this);
+        DeleteVisitor<Ts...> dv(*this);
         visit(dv);
     }
 
     template <typename T>
     T& get() {
-        static_assert(Position<T, Types...>::pos != -1,
+        static_assert(Position<T, Ts...>::pos != -1,
             "type not found");
-        if(_what == Position<T, Types...>::pos) {
+        if(_what == Position<T, Ts...>::pos) {
             return *reinterpret_cast<T*>(_handle);
         } else {
             throw std::runtime_error("cannot cast");
@@ -107,7 +107,7 @@ public:
 
     template <typename T>
     bool is() const {
-        return Position<T, Types...>::pos == _what;
+        return Position<T, Ts...>::pos == _what;
     }
 
     template <typename T>
@@ -127,9 +127,9 @@ public:
         return visit(cv);
     }
 
-    template <typename Visitor>
-    typename Visitor::ReturnType visit(Visitor &visitor) {
-        return RuntimeChoose<0, sizeof...(Types)-1, Types...>
+    template <typename Visitor, typename R = typename Visitor::ReturnType>
+    R visit(Visitor &visitor) {
+        return RuntimeChoose<0, sizeof...(Ts)-1, Ts...>
             ::apply(_what, _handle, visitor);
     }
 
@@ -144,7 +144,7 @@ public:
     template<typename T>
     void init(T &&obj) {
         using DecayT = std::decay_t<T>;
-        _what = Position<DecayT, Types...>::pos;
+        _what = Position<DecayT, Ts...>::pos;
         new(_handle) DecayT(std::forward<T>(obj));
     }
 };
