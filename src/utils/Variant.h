@@ -2,10 +2,8 @@
 #define __JSON_UTILS_VARIANT_H__
 #include <bits/stdc++.h>
 #include "TypeTraits.h"
+#include "Visitor.h"
 namespace vsjson {
-
-template <typename ...Types>
-class Variant;
 
 template <int Lo, int Hi, typename ...Ts>
 struct RuntimeChoose {
@@ -20,92 +18,6 @@ struct RuntimeChoose {
         } else {
             return RuntimeChoose<std::min(Mid + 1, Hi), Hi, Ts...>::apply(n, data, visitor);
         }
-    }
-};
-
-// lhs = rhs
-template <typename ...Types>
-struct CopyConstructVisitor {
-    using ReturnType = void;
-    Variant<Types...> &lhs;
-    CopyConstructVisitor(Variant<Types...> &lhs): lhs(lhs) { }
-    template <typename T>
-    ReturnType operator()(const T &obj) {
-        lhs.init(obj);
-    }
-};
-
-template <typename ...Types>
-struct MoveConstructVisitor {
-    using ReturnType = void;
-    Variant<Types...> &lhs;
-    MoveConstructVisitor(Variant<Types...> &lhs): lhs(lhs) { }
-    template <typename T>
-    ReturnType operator()(T &obj) {
-        lhs.init(std::move(obj));
-    }
-};
-
-template <typename ...Types>
-struct DeleteVisitor {
-    using ReturnType = void;
-    Variant<Types...> &self;
-    DeleteVisitor(Variant<Types...> &self): self(self) {}
-    template <typename T>
-    ReturnType operator()(const T &) {
-        ((T*)self.handle())->~T();
-    }
-};
-
-
-struct OsVisitor {
-    using ReturnType = std::ostream&;
-    std::ostream &_os;
-    OsVisitor(std::ostream &os): _os(os) {}
-    
-    template <typename T>
-    std::enable_if_t<HasOperatorLeftShift<T>::value, 
-    ReturnType> operator()(T &obj) { 
-        _os << obj;
-        return _os;
-    }
-
-    template <typename T>
-    std::enable_if_t<!HasOperatorLeftShift<T>::value, 
-    ReturnType> operator()(T &obj) { 
-        throw std::runtime_error("[type]" + std::string(typeid(obj).name()) 
-            + " does not support IO");
-        return _os;
-    }
-};
-
-template <typename U>
-struct ConvertVisitor {
-    using ReturnType = U;
-    template <typename T>
-    std::enable_if_t<std::is_convertible<T, U>::value,
-    ReturnType> operator()(T &obj) { return obj; }
-    template <typename T>
-    std::enable_if_t<!std::is_convertible<T, U>::value,
-    ReturnType> operator()(T &obj) {
-        throw std::runtime_error("[type]" + std::string(typeid(obj).name())
-            + " does not support convert to [type]" + std::string(typeid(U).name()));
-        return U{};
-    }
-};
-
-template <typename U>
-struct MovedConvertVisitor {
-    using ReturnType = U;
-    template <typename T>
-    std::enable_if_t<std::is_convertible<T, U>::value,
-    ReturnType> operator()(T &obj) { return std::move(obj); }
-    template <typename T>
-    std::enable_if_t<!std::is_convertible<T, U>::value,
-    ReturnType> operator()(T &obj) {
-        throw std::runtime_error("[type]" + std::string(typeid(obj).name())
-            + " does not support moved convert to [type]" + std::string(typeid(U).name()));
-        return U{};
     }
 };
 
