@@ -144,11 +144,11 @@ bool Json::is<nullptr_t>() const { return _value.is<NullImpl>(); }
 
 std::ostream& operator<<(std::ostream &os, ArrayImpl &vec) {
     os << '[';
-    if(vec.size() > 0) {
+    if(!vec.empty()) {
         auto last = --vec.end();
         for(auto it = vec.begin(); it != last; ++it) {
-            if(it->is<StringImpl>()) os << '\"' << *it << "\", ";
-            else os << *it << ", ";
+            if(it->is<StringImpl>()) os << '\"' << *it << "\",";
+            else os << *it << ',';
         }
         if(last->is<StringImpl>()) os << '\"' << *last << '\"';
         else os << *last;
@@ -159,15 +159,14 @@ std::ostream& operator<<(std::ostream &os, ArrayImpl &vec) {
 
 std::ostream& operator<<(std::ostream &os, ObjectImpl &map) {
     os << '{';
-    if(map.size() > 0) {
+    if(!map.empty()) {
         auto last = --map.end();
         for(auto it = map.begin(); it != last; ++it) {
-            os << '\"' << it->first << "\" : ";
-            if(it->second.is<StringImpl>()) os << '\"' << it->second << "\", ";
-            else os << it->second << ", ";
+            os << '\"' << it->first << "\":";
+            if(it->second.is<StringImpl>()) os << '\"' << it->second << "\",";
+            else os << it->second << ',';
         }
-        
-        os << '\"' << last->first << "\" : ";
+        os << '\"' << last->first << "\":";
         if(last->second.is<StringImpl>()) os << '\"' << last->second << '\"';
         else os << last->second;
     }
