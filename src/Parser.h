@@ -2,6 +2,7 @@
 #define __JSON_PARSER_H__
 #include <bits/stdc++.h>
 #include "Json.h"
+#include "JsonException.h"
 namespace vsjson {
 
 namespace ParserImpl {
@@ -83,7 +84,7 @@ inline Json parseObject(const char *&p) {
         p = skipWhiteSpace(p);
         StringImpl key = parseString(p);
         p = skipWhiteSpace(p);
-        if(*p != ':') ; // throw
+        if(*p != ':') throw JsonException("object parse failure: expect [:]");
         ++p; // :
         p = skipWhiteSpace(p);
         object[key] = parseImpl(p);
@@ -94,7 +95,7 @@ inline Json parseObject(const char *&p) {
         } else if(*p == ',') {
             ++p;
         } else {
-            // throw
+            throw JsonException("object parse failure: unknown reason");
         }
     }
     return object;
@@ -119,7 +120,7 @@ inline Json parseArray(const char *&p) {
         } else if(*p == ',') {
             ++p;
         } else {
-
+            throw JsonException("arrary parse failure: unknown reason");
         }
     }
     return array;
@@ -127,11 +128,15 @@ inline Json parseArray(const char *&p) {
 
 inline StringImpl parseString(const char *&p) {
     p = skipWhiteSpace(p);
-    if(*p != '\"') ; // throw
+    if(*p != '\"') {
+        throw JsonException("string parse failure: expect [\"]");
+    }
     ++p; // "
     auto start = p;
     while(p && *p != '\"') ++p;
-    if(!p) ; // throw
+    if(!p) {
+        throw JsonException("string parse failure: pair [\"]");
+    }
     auto end = p; //[start, end)
     ++p; // "
     return std::string(start, end - start); 
@@ -143,17 +148,22 @@ inline IntegerImpl parseInteger(const char *&p) {
         i = i*10 + (*p - '0');
         ++p;
     }
-    if(!p) ; // throw
+    if(!p) {
+        throw JsonException("integer parse failure: assert non-\\n");
+    }
     return i;
 }
 
 inline DecimalImpl parseDeciaml(const char *&p) {
+    throw JsonException("decimal parse failure: currently not support deciaml");
     DecimalImpl d = 0;
     while(p && (isdigit(*p) || *p == '.')) { // - E e
         if(*p == '.') ;
         ++p;
     }
-    if(!p) ;
+    if(!p) {
+        throw JsonException("decimal parse failure: assert non-\\n");
+    }
     return d;
 }
 
