@@ -39,8 +39,7 @@ int main() {
     std::cout << p.x << ' ' << p.y << ' ' << p.z << std::endl;
 
     // 提供STL复用的迭代器
-    auto &obj = json.as<std::map<std::string, vsjson::Json>>();
-    for(auto &&iter : obj) {
+    for(auto &&iter : json) {
         std::cout << iter.first << ' ' << iter.second << std::endl;
     }
 

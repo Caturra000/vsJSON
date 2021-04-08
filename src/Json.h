@@ -131,6 +131,14 @@ public:
         return ss.str();
     }
 
+    auto begin() -> ObjectImpl::iterator {
+        return _value.get<ObjectImpl>().begin();
+    }
+
+    auto end() -> ObjectImpl::iterator {
+        return _value.get<ObjectImpl>().end();
+    }
+
 private:
     JsonValue _value;
 };
