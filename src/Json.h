@@ -1,8 +1,8 @@
 #ifndef __JSON_H__
 #define __JSON_H__
 #include <bits/stdc++.h>
-#include "utils/Variant.h"
-#include "utils/TypeCompat.h"
+#include "internal/Variant.h"
+#include "internal/TypeCompat.h"
 #include "JsonValue.h"
 namespace vsjson {
 
