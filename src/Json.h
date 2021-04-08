@@ -77,7 +77,7 @@ public:
 
     template <typename ...Args>
     static JsonValue array(Args &&...elems) {
-        return JsonValue(std::vector<Json>{std::forward<Args>(elems)...});
+        return JsonValue(ArrayImpl{std::forward<Args>(elems)...});
     }
 
     friend std::ostream& operator<<(std::ostream &os, Json &json) {
