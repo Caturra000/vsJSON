@@ -125,6 +125,10 @@ public:
         _value.get<ArrayImpl>().emplace_back(json);
     }
 
+    void append(Json &&json) {
+        _value.get<ArrayImpl>().emplace_back(static_cast<Json&&>(json));
+    }
+
     std::string dump() {
         std::stringstream ss;
         ss << (*this);
