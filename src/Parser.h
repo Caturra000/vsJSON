@@ -34,6 +34,8 @@ inline const char* skipWhiteSpace(const char *p) {
 
 inline Json parseImpl(const char *&p) {
     p = skipWhiteSpace(p);
+    int buf = 0;
+    int sign = 1;
     switch (*p) {
         case '{':
             return parseObject(p);
@@ -52,7 +54,7 @@ inline Json parseImpl(const char *&p) {
             return false;
         case '-':
             ++p;
-            return -parseInteger(p);
+            sign = -1;
         case '0':
         case '1':
         case '2':
@@ -62,9 +64,15 @@ inline Json parseImpl(const char *&p) {
         case '6':
         case '7':
         case '8':
-        case '9': // 没有decimal
-            return parseInteger(p);
-        
+        case '9':
+            if(p && *p != '.') {
+                buf = parseInteger(p);
+            }
+            if(!p || *p != '.') {
+                return sign * buf;
+            }
+        case '.':
+            return sign * (buf + parseDeciaml(p));
         default:
             // impossible
             return nullptr;
@@ -163,11 +171,11 @@ inline IntegerImpl parseInteger(const char *&p) {
 }
 
 inline DecimalImpl parseDeciaml(const char *&p) {
-    throw JsonException(
-        "decimal parse failure: currently not support deciaml");
-    DecimalImpl d = 0;
-    while(p && (isdigit(*p) || *p == '.')) { // - E e
-        if(*p == '.') ;
+    ++p; // '.'
+    DecimalImpl d = 0, idx = 0.1;
+    while(p && isdigit(*p)) { // TODO E e
+        d += idx * ((*p) - '0');
+        idx *= 0.1;
         ++p;
     }
     if(!p) {

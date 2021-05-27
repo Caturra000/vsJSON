@@ -28,7 +28,7 @@ int main() {
     // 静态构造
     Json json =
     {
-        {"index0", Json::array(1, 2, "3", true)},
+        {"index0", Json::array(1, 2.5, "3", true)},
         {"index1", false},
         {"index2", Json {
             {"index2-1", nullptr}
@@ -66,14 +66,14 @@ int main() {
     // 简单parser
     auto toJson = R"(
         {
-            "index0": [1, -2, "345", true, false], 
-            "index1": false, 
+            "index0": [1, -2.345, "345", true, false],
+            "index1": false,
             "index2": {
                 "index2-1": {
                     "index2-1-1" : [true, false, 1, 233],
                     "index2-1-2" : false
                 }
-            }, 
+            },
             "index3": 5
         }
     )";

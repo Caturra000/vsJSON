@@ -16,7 +16,7 @@ int main() {
 
     // 静态构造
     vsjson::Json json {
-        {"index0", vsjson::Json::array(1, 2, "3", true)},
+        {"index0", vsjson::Json::array(1, 2.5, "3", true)},
         {"index1", false},
         {"index2", vsjson::Json {
             {"index2-1", nullptr}
@@ -46,30 +46,28 @@ int main() {
     // 重新赋值
     json = nullptr;
     std::cout << json << std::endl;
-    
+
     // 判断类型
     bool isNull = json.is<nullptr_t>();
     std::cout << (isNull ? "true" : "false") << std::endl;
 
     // 简单parser
     auto toJson = R"(
-
         {
-            "index0": [1, -2, "345", true, false], 
-            "index1": false, 
+            "index0": [1, -2.345, "345", true, false],
+            "index1": false,
             "index2": {
                 "index2-1": {
                     "index2-1-1" : [true, false, 1, 233],
                     "index2-1-2" : false
                 }
-            }, 
+            },
             "index3": 5
         }
-
     )";
     auto json2 = vsjson::parse(toJson);
 
-    auto toArrayJson = "[1, 2, false, \"jojo\"]";
+    auto toArrayJson = "[1, 2.3, false, \"jojo\"]";
     auto json3 = vsjson::parse(toArrayJson);
 
     std::cout << json2 << std::endl;
