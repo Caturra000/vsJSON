@@ -34,8 +34,8 @@ inline const char* skipWhiteSpace(const char *p) {
 
 inline Json parseImpl(const char *&p) {
     p = skipWhiteSpace(p);
-    int buf = 0;
-    int sign = 1;
+    IntegerImpl buf = 0;
+    bool neg = false;
     switch (*p) {
         case '{':
             return parseObject(p);
@@ -54,7 +54,7 @@ inline Json parseImpl(const char *&p) {
             return false;
         case '-':
             ++p;
-            sign = -1;
+            neg = true;
         case '0':
         case '1':
         case '2':
@@ -69,10 +69,11 @@ inline Json parseImpl(const char *&p) {
                 buf = parseInteger(p);
             }
             if(!p || *p != '.') {
-                return sign * buf;
+                return !neg ? buf : -buf;
             }
         case '.':
-            return sign * (buf + parseDeciaml(p));
+            return !neg ? (buf + parseDeciaml(p))
+                : -(buf + parseDeciaml(p));
         default:
             // impossible
             return nullptr;
