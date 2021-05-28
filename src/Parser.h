@@ -7,6 +7,7 @@ namespace vsjson {
 
 namespace ParserImpl {
     Json parseImpl(const char *&p);
+    Json parseNumberImpl(const char *&p);
     StringImpl parseString(const char *&p);
     Json parseObject(const char *&p);
     Json parseArray(const char *&p);
@@ -25,15 +26,17 @@ inline Json parse(const std::string &str) {
 namespace ParserImpl {
 
 inline bool isWhitespace(char ch) {
-    return ch == ' ' || ch == '\n' || ch == '\t';
+    return ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r';
 }
-inline const char* skipWhiteSpace(const char *p) {
+
+inline const char* skipWhitespace(const char *p) {
     while(p && (isWhitespace(*p))) ++p;
     return p;
 }
 
 inline Json parseImpl(const char *&p) {
-    p = skipWhiteSpace(p);
+    p = skipWhitespace(p);
+    if(!p || !*p) return nullptr;
     IntegerImpl buf = 0;
     bool neg = false;
     switch (*p) {
@@ -53,6 +56,30 @@ inline Json parseImpl(const char *&p) {
             p += 5;
             return false;
         case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '.':
+            return parseNumberImpl(p);
+        default:
+            // impossible
+            return nullptr;
+    }
+    return nullptr;
+}
+
+inline Json parseNumberImpl(const char *&p) {
+    IntegerImpl buf = 0;
+    bool neg = false;
+    switch (*p) {
+        case '-':
             ++p;
             neg = true;
         case '0':
@@ -65,9 +92,11 @@ inline Json parseImpl(const char *&p) {
         case '7':
         case '8':
         case '9':
-            if(p && *p != '.') {
+            // case: -.123
+            if(*p != '.') {
                 buf = parseInteger(p);
             }
+            // shoule be integer
             if(!p || *p != '.') {
                 return !neg ? buf : -buf;
             }
@@ -75,7 +104,6 @@ inline Json parseImpl(const char *&p) {
             return !neg ? (buf + parseDeciaml(p))
                 : -(buf + parseDeciaml(p));
         default:
-            // impossible
             return nullptr;
     }
     return nullptr;
@@ -83,24 +111,24 @@ inline Json parseImpl(const char *&p) {
 
 inline Json parseObject(const char *&p) {
     ++p; // {
-    p = skipWhiteSpace(p);
+    p = skipWhitespace(p);
     Json object(ObjectImpl{});
     if(*p == '}') {
         ++p;
         return object;
     }
     for(;;) {
-        p = skipWhiteSpace(p);
+        p = skipWhitespace(p);
         StringImpl key = parseString(p);
-        p = skipWhiteSpace(p);
+        p = skipWhitespace(p);
         if(*p != ':') {
             throw JsonException(
                 "object parse failure: expect [:]");
         }
         ++p; // :
-        p = skipWhiteSpace(p);
+        p = skipWhitespace(p);
         object[key] = parseImpl(p);
-        p = skipWhiteSpace(p);
+        p = skipWhitespace(p);
         if(*p == '}') {
             ++p;
             break;
@@ -116,17 +144,17 @@ inline Json parseObject(const char *&p) {
 
 inline Json parseArray(const char *&p) {
     ++p;
-    p = skipWhiteSpace(p);
+    p = skipWhitespace(p);
     Json array = Json::array();
     if(*p == ']') {
         ++p;
         return array;
     }
     for(;;) {
-        p = skipWhiteSpace(p);
+        p = skipWhitespace(p);
         auto r = parseImpl(p);
         array.append(r);
-        p = skipWhiteSpace(p);
+        p = skipWhitespace(p);
         if(*p == ']') {
             ++p;
             break;
@@ -141,7 +169,7 @@ inline Json parseArray(const char *&p) {
 }
 
 inline StringImpl parseString(const char *&p) {
-    p = skipWhiteSpace(p);
+    p = skipWhitespace(p);
     if(*p != '\"') {
         throw JsonException(
             "string parse failure: expect [\"]");
@@ -155,7 +183,7 @@ inline StringImpl parseString(const char *&p) {
     }
     auto end = p; //[start, end)
     ++p; // "
-    return std::string(start, end - start); 
+    return StringImpl(start, end - start);
 }
 
 inline IntegerImpl parseInteger(const char *&p) {
@@ -164,7 +192,7 @@ inline IntegerImpl parseInteger(const char *&p) {
         i = i*10 + (*p - '0');
         ++p;
     }
-    if(!p) {
+    if(!p || !*p) {
         throw JsonException(
             "integer parse failure: assert non-\\n");
     }
@@ -179,7 +207,7 @@ inline DecimalImpl parseDeciaml(const char *&p) {
         idx *= 0.1;
         ++p;
     }
-    if(!p) {
+    if(!p || !*p) {
         throw JsonException(
             "decimal parse failure: assert non-\\n");
     }
