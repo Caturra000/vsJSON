@@ -9,18 +9,18 @@ class Json;
 using NullImpl = Null;
 using ObjectImpl = std::map<std::string, Json>;
 using ArrayImpl = std::vector<Json>;
-using StringImpl = std::string;
+using StringImpl = FormatString; //std::string;
 using IntegerImpl = int;
 using DecimalImpl = double;
 using BooleanImpl = Boolean;
 
 using JsonValue =
         Variant<NullImpl,
-                ObjectImpl, 
-                ArrayImpl, 
-                StringImpl, 
-                IntegerImpl, 
-                DecimalImpl, 
+                ObjectImpl,
+                ArrayImpl,
+                StringImpl,
+                IntegerImpl,
+                DecimalImpl,
                 BooleanImpl>;
 
 } // vsjson

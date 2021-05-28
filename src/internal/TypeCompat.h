@@ -27,5 +27,14 @@ struct Null {
     }
 };
 
+struct FormatString: public std::string {
+    using Base = std::string;
+    using Base::Base;
+    friend std::ostream& operator<<(std::ostream &os, FormatString &fs) {
+        os << '\"' << static_cast<Base&>(fs) << '\"';
+        return os;
+    }
+};
+
 } // vsjson
 #endif

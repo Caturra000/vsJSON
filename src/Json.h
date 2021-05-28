@@ -153,17 +153,19 @@ bool Json::is<bool>() const { return _value.is<BooleanImpl>(); }
 template <>
 bool Json::is<nullptr_t>() const { return _value.is<NullImpl>(); }
 
+template <>
+bool Json::is<std::string>() const { return _value.is<StringImpl>(); }
+
+template <>
+std::string& Json::as<std::string>()  { return _value.get<StringImpl>(); }
 
 std::ostream& operator<<(std::ostream &os, ArrayImpl &vec) {
     os << '[';
-    if(!vec.empty()) {
-        auto last = --vec.end();
-        for(auto it = vec.begin(); it != last; ++it) {
-            if(it->is<StringImpl>()) os << '\"' << *it << "\",";
-            else os << *it << ',';
+    for(auto iter = vec.begin(); iter != vec.end(); ++iter) {
+        os << *iter;
+        if(std::distance(iter, vec.end()) > 1) {
+            os << ',';
         }
-        if(last->is<StringImpl>()) os << '\"' << *last << '\"';
-        else os << *last;
     }
     os << ']';
     return os;
@@ -171,16 +173,11 @@ std::ostream& operator<<(std::ostream &os, ArrayImpl &vec) {
 
 std::ostream& operator<<(std::ostream &os, ObjectImpl &map) {
     os << '{';
-    if(!map.empty()) {
-        auto last = --map.end();
-        for(auto it = map.begin(); it != last; ++it) {
-            os << '\"' << it->first << "\":";
-            if(it->second.is<StringImpl>()) os << '\"' << it->second << "\",";
-            else os << it->second << ',';
+    for(auto iter = map.begin(); iter != map.end(); ++iter) {
+        os << '\"' << iter->first << "\":" << iter->second;
+        if(std::distance(iter, map.end()) > 1) {
+            os << ',';
         }
-        os << '\"' << last->first << "\":";
-        if(last->second.is<StringImpl>()) os << '\"' << last->second << '\"';
-        else os << last->second;
     }
     os << '}';
     return os;

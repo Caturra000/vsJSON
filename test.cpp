@@ -73,7 +73,14 @@ int main() {
     std::cout << json2 << std::endl;
     std::cout << json3 << std::endl;
 
-    // TODO 美化格式
-    // TODO2 完善parser
+    // special judge
+    std::string format1 = "\"3\"";
+    auto json4 = vsjson::parse(format1);
+    std::string format2 = json4.to<std::string>();
+    std::string &format3 = json4.as<std::string>();
+    std::string format4 = json4.dump();
+    std::cout << format2 << std::endl;
+    std::cout << format3 << std::endl;
+    std::cout << format4 << std::endl;
     return 0;
 }
