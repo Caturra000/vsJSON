@@ -166,7 +166,10 @@ inline StringImpl parseString(const char *&p) {
     }
     ++p; // "
     auto start = p;
-    while(p && *p != '\"') ++p;
+    while(p && *p != '\"') {
+        if(*p == '\\') ++p; // switch-case *p: quote / solidus / backspace...
+        ++p;
+    }
     if(!p) {
         throw JsonException(
             "string parse failure: pair [\"]");
