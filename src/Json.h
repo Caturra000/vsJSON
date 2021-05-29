@@ -56,7 +56,7 @@ public:
         _value = std::move(rhs._value);
         return *this;
     }
-    
+
     template <size_t N>
     Json& operator=(const char (&str)[N]) {
         _value = StringImpl(str);
@@ -116,7 +116,7 @@ public:
     size_t size() const {
         return _value.get<ObjectImpl>().size();
     }
-    
+
     size_t arraySize() const {
         return _value.get<ArrayImpl>().size();
     }
@@ -131,6 +131,15 @@ public:
 
     std::string dump() {
         std::stringstream ss;
+        ss << (*this);
+        return ss.str();
+    }
+
+    template <typename ...Specifieds>
+    std::string dump(Specifieds &&...ses) {
+        std::stringstream ss;
+        // set stream status or put data before dump
+        std::initializer_list<int> {((ss << std::forward<Specifieds>(ses)), 19260817)...};
         ss << (*this);
         return ss.str();
     }

@@ -82,5 +82,15 @@ int main() {
     std::cout << format2 << std::endl;
     std::cout << format3 << std::endl;
     std::cout << format4 << std::endl;
+
+    // 定制std::stringstream
+    std::string veryVeryLong = R"(
+        {"geometry":{"rings":[[[40426489.331430912,3001752.0858958033],[40426225.692211367,3001750.0779145896],
+        [40426202.957955509,3001594.0301330695],[40426290.959128119,3001559.0584689],[40426390.723533183,3001537.0470353812],
+        [40426464.66273,3001645.3116807956],[40426489.331430912,3001752.0858958033]]],"spatialReference":{"wkid":2364}},"succeed":true,"msg":""}
+    )";
+    vsjson::Json longJson = vsjson::parse(veryVeryLong);
+    std::cout << longJson.dump(std::fixed, std::setprecision(10)) << std::endl;
+    std::cout << longJson << std::endl;
     return 0;
 }
