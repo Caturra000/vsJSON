@@ -13,6 +13,7 @@ namespace ParserImpl {
     Json parseArray(const char *&p);
     IntegerImpl parseInteger(const char *&p);
     DecimalImpl parseDeciaml(const char *&p);
+    DecimalImpl parseExponent(const char *&p);
 }
 
 inline Json parse(const char *p) {
@@ -76,35 +77,24 @@ inline Json parseImpl(const char *&p) {
 }
 
 inline Json parseNumberImpl(const char *&p) {
-    IntegerImpl buf = 0;
     bool neg = false;
-    switch (*p) {
-        case '-':
-            ++p;
-            neg = true;
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            // case: -.123
-            if(*p != '.') {
-                buf = parseInteger(p);
+    if(*p == '-') {
+        ++p;
+        neg = true;
+    }
+    if(isdigit(*p)) {
+        IntegerImpl integer = parseInteger(p);
+        if(*p == '.') {
+            DecimalImpl decimal = parseDeciaml(p);
+            decimal += integer;
+            if(*p == 'e' || *p == 'E') {
+                DecimalImpl e = parseExponent(p);
+                decimal *= e;
             }
-            // shoule be integer
-            if(!p || *p != '.') {
-                return !neg ? buf : -buf;
-            }
-        case '.':
-            return !neg ? (buf + parseDeciaml(p))
-                : -(buf + parseDeciaml(p));
-        default:
-            return nullptr;
+            return !neg ? decimal : -decimal;
+        } else {
+            return !neg ? integer : -integer;
+        }
     }
     return nullptr;
 }
@@ -188,10 +178,12 @@ inline StringImpl parseString(const char *&p) {
 
 inline IntegerImpl parseInteger(const char *&p) {
     IntegerImpl i = 0;
+    p = skipWhitespace(p);
     while(p && isdigit(*p)) { // -
         i = i*10 + (*p - '0');
         ++p;
     }
+    p = skipWhitespace(p);
     if(!p || !*p) {
         throw JsonException(
             "integer parse failure: assert non-\\n");
@@ -201,17 +193,48 @@ inline IntegerImpl parseInteger(const char *&p) {
 
 inline DecimalImpl parseDeciaml(const char *&p) {
     ++p; // '.'
+    p = skipWhitespace(p);
     DecimalImpl d = 0, idx = 0.1;
-    while(p && isdigit(*p)) { // TODO E e
+    while(p && isdigit(*p)) {
         d += idx * ((*p) - '0');
         idx *= 0.1;
         ++p;
     }
+    p = skipWhitespace(p);
     if(!p || !*p) {
         throw JsonException(
             "decimal parse failure: assert non-\\n");
     }
     return d;
+}
+
+template <typename>
+struct ExponentCache;
+
+// generate 1.0, 10.0, 100.0... at compile time
+template <size_t ...Is>
+struct ExponentCache<std::index_sequence<Is...>> {
+    constexpr static DecimalImpl pows[] = {std::pow(10, Is)...};
+};
+
+template <size_t ...Is>
+constexpr DecimalImpl ExponentCache<std::index_sequence<Is...>>::pows[];
+
+inline DecimalImpl parseExponent(const char *&p) {
+    static constexpr size_t exponentLimit = 309;
+    using Generator = std::make_index_sequence<exponentLimit>;
+    ++p; // e E
+    p = skipWhitespace(p);
+    bool neg = (*p == '-');
+    if(*p == '+' || *p == '-') ++p;
+    IntegerImpl i = parseInteger(p);
+    p = skipWhitespace(p);
+    if(!p || !*p) {
+        throw JsonException(
+            "exponent parse failure: assert non-\\n");
+    }
+    DecimalImpl e = ExponentCache<Generator>::pows[i];
+    return !neg ? e : 1.0/e;
 }
 
 } // ParserImpl
