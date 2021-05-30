@@ -84,17 +84,18 @@ inline Json parseNumberImpl(const char *&p) {
     }
     if(isdigit(*p)) {
         IntegerImpl integer = parseInteger(p);
-        if(*p == '.') {
-            DecimalImpl decimal = parseDeciaml(p);
-            decimal += integer;
-            if(*p == 'e' || *p == 'E') {
-                DecimalImpl e = parseExponent(p);
-                decimal *= e;
-            }
-            return !neg ? decimal : -decimal;
-        } else {
+        if(*p != '.') {
             return !neg ? integer : -integer;
         }
+        // *p == '.'
+        DecimalImpl decimal = parseDeciaml(p);
+        decimal += integer;
+        if(*p != 'e' && *p != 'E') {
+            return !neg ? decimal : -decimal;
+        }
+        // *p == 'e' || *p == 'E'
+        DecimalImpl e = parseExponent(p);
+        return !neg ? e*decimal : -e*decimal;
     }
     return nullptr;
 }
