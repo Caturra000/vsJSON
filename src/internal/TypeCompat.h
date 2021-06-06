@@ -30,6 +30,15 @@ struct Null {
 struct FormatString: public std::string {
     using Base = std::string;
     using Base::Base;
+    FormatString(const Base &base): Base(base) {}
+    FormatString(Base &&base): Base(static_cast<Base&&>(base)) {}
+    FormatString(const FormatString &) = default;
+    FormatString(FormatString &&) = default;
+    FormatString& operator=(FormatString rhs) {
+        rhs.swap(*this);
+        return *this;
+    }
+
     friend std::ostream& operator<<(std::ostream &os, FormatString &fs) {
         os << '\"' << static_cast<Base&>(fs) << '\"';
         return os;

@@ -19,6 +19,8 @@ public:
 
     Json(bool b): _value(Boolean(b)) {}
     Json(nullptr_t): _value(NullImpl(nullptr)) {}
+    Json(const std::string &str): _value(StringImpl(str)) {}
+    Json(std::string &&str): _value(StringImpl(static_cast<std::string&&>(str))) {}
 
     Json(const Json &rhs): _value(rhs._value) {}
     Json(Json &&rhs): _value(std::move(rhs._value)) {}
@@ -70,6 +72,16 @@ public:
 
     Json& operator=(nullptr_t) {
         _value = NullImpl(nullptr);
+        return *this;
+    }
+
+    Json& operator=(const std::string &str) {
+        _value = StringImpl(str);
+        return *this;
+    }
+
+    Json& operator=(std::string &&str) {
+        _value = StringImpl(static_cast<std::string&&>(str));
         return *this;
     }
 
