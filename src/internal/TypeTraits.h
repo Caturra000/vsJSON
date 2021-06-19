@@ -53,13 +53,14 @@ struct StreamSupport {
 };
 
 // require
+// make typename std::enable_if<blabla::value, T>::type shorter
 
 template <bool Cond, typename T = void>
-using Require = std::enable_if_t<Cond, T>;
+using RequireBool = std::enable_if_t<Cond, T>;
 template <typename Cond, typename T = void>
-using RequireValue = Require<Cond::value, T>;
+using Require = RequireBool<Cond::value, T>;
 template <typename Cond, typename T = void>
-using RequireValueNot = Require<!Cond::value, T>;
+using RequireNot = RequireBool<!Cond::value, T>;
 
 } // detail
 } // vsjson

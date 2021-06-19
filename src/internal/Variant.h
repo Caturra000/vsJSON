@@ -26,7 +26,7 @@ public:
     }
 
     template <typename T,
-    typename = std::enable_if_t<!std::is_same<std::decay_t<T>, Variant>::value>>
+    typename = RequireNot<std::is_same<std::decay_t<T>, Variant>>>
     Variant(T &&obj) {
         static_assert(Position<std::decay_t<T>, Ts...>::pos != -1,
             "type not found");
@@ -52,7 +52,7 @@ public:
     }
 
     template <typename T,
-    typename = std::enable_if_t<!std::is_same<std::decay_t<T>, Variant>::value>>
+    typename = RequireNot<std::is_same<std::decay_t<T>, Variant>>>
     Variant& operator=(T &&rhs) {
         this->~Variant();
         init(std::forward<T>(rhs));
