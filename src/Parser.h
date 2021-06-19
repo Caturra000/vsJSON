@@ -5,7 +5,14 @@
 #include "JsonException.h"
 namespace vsjson {
 
-namespace ParserImpl {
+/// interface
+
+Json parse(const char *p);
+Json parse(const std::string &str);
+
+/// impl
+
+namespace parser {
     Json parseImpl(const char *&p);
     Json parseNumberImpl(const char *&p);
     StringImpl parseString(const char *&p);
@@ -17,14 +24,14 @@ namespace ParserImpl {
 }
 
 inline Json parse(const char *p) {
-    return ParserImpl::parseImpl(p);
+    return parser::parseImpl(p);
 }
 
 inline Json parse(const std::string &str) {
     return parse(str.data());
 }
 
-namespace ParserImpl {
+namespace parser {
 
 inline bool isWhitespace(char ch) {
     return ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r';
@@ -241,7 +248,7 @@ inline DecimalImpl parseExponent(const char *&p) {
     return !neg ? e : 1.0/e;
 }
 
-} // ParserImpl
+} // parser
 
 } // vsjson
 #endif

@@ -4,21 +4,13 @@
 #include "TypeTraits.h"
 #include "Visitor.h"
 namespace vsjson {
+namespace detail {
 
+// used for Variant::visit()
 template <int Lo, int Hi, typename ...Ts>
 struct RuntimeChoose {
     template <typename Visitor>
-    static typename Visitor::ReturnType apply(int n, void *data, Visitor &visitor) {
-        constexpr int Mid = Lo + (Hi - Lo >> 1);
-        if(Mid == n) {
-            using Type = typename TypeAt<Mid, Ts...>::Type;
-            return visitor(*reinterpret_cast<Type*>(data));
-        } else if(Mid > n) {
-            return RuntimeChoose<Lo, std::max(Mid - 1, Lo), Ts...>::apply(n, data, visitor);
-        } else {
-            return RuntimeChoose<std::min(Mid + 1, Hi), Hi, Ts...>::apply(n, data, visitor);
-        }
-    }
+    static typename Visitor::ReturnType apply(int n, void *data, Visitor &visitor);
 };
 
 template <typename ...Ts>
@@ -26,7 +18,7 @@ class Variant {
 private:
     int _what;
     char _handle[MaxSize<Ts...>::size];
-    
+
 public:
     Variant() {
         _what = -1;
@@ -35,19 +27,19 @@ public:
 
     template <typename T,
     typename = std::enable_if_t<!std::is_same<std::decay_t<T>, Variant>::value>>
-    Variant(T &&obj) { 
+    Variant(T &&obj) {
         static_assert(Position<std::decay_t<T>, Ts...>::pos != -1,
             "type not found");
         init(std::forward<T>(obj));
     }
 
     Variant(const Variant &rhs) {
-        CopyConstructVisitor<Ts...> ccv(*this);
+        visitor::CopyConstructVisitor<Ts...> ccv(*this);
         const_cast<Variant&>(rhs).visit(ccv);
     }
 
     Variant(Variant &&rhs) {
-        MoveConstructVisitor<Ts...> mcv(*this);
+        visitor::MoveConstructVisitor<Ts...> mcv(*this);
         rhs.visit(mcv);
         // rhs._what = -1;
         // memset(rhs._handle, 0, sizeof(rhs._handle));
@@ -70,7 +62,7 @@ public:
     Variant& operator=(const Variant &rhs){
         if(this == &rhs) return *this;
         this->~Variant();
-        CopyConstructVisitor<Ts...> ccv(*this);
+        visitor::CopyConstructVisitor<Ts...> ccv(*this);
         const_cast<Variant&>(rhs).visit(ccv);
         return *this;
     }
@@ -78,14 +70,14 @@ public:
     Variant& operator=(Variant &&rhs) {
         if(this == &rhs) return *this;
         this->~Variant();
-        MoveConstructVisitor<Ts...> mcv(*this);
+        visitor::MoveConstructVisitor<Ts...> mcv(*this);
         rhs.visit(mcv);
         return *this;
     }
 
     ~Variant() {
         if(_what == -1) return;
-        DeleteVisitor<Ts...> dv(*this);
+        visitor::DeleteVisitor<Ts...> dv(*this);
         visit(dv);
     }
 
@@ -112,7 +104,7 @@ public:
 
     template <typename T>
     T to() & {
-        ConvertVisitor<T> cv;
+        visitor::ConvertVisitor<T> cv;
         return visit(cv);
     }
 
@@ -123,7 +115,7 @@ public:
 
     template <typename T>
     T to() && {
-        MovedConvertVisitor<T> cv;
+        visitor::MovedConvertVisitor<T> cv;
         return visit(cv);
     }
 
@@ -134,7 +126,7 @@ public:
     }
 
     friend std::ostream& operator<<(std::ostream &os, Variant &variant) {
-        OsVisitor osv(os);
+        visitor::OsVisitor osv(os);
         return variant.visit(osv);
     }
 
@@ -149,31 +141,20 @@ public:
     }
 };
 
-// template <typename T>
-// std::enable_if_t<HasOperatorLeftShift<T>::value, 
-// std::ostream&> operator<<(std::ostream &os, std::vector<T> &vec) {
-//     os << '[';
-//     if(vec.size() > 0) {
-//         auto last = --vec.end();
-//         for(auto it = vec.begin(); it != last; ++it) os << *it << ", ";
-//         os << *last;
-//     }
-//     os << ']';
-//     return os;
-// }
+template <int Lo, int Hi, typename ...Ts>
+template <typename Visitor>
+inline typename Visitor::ReturnType RuntimeChoose<Lo, Hi, Ts...>::apply(int n, void *data, Visitor &visitor) {
+    constexpr int Mid = Lo + (Hi - Lo >> 1);
+    if(Mid == n) {
+        using Type = typename TypeAt<Mid, Ts...>::Type;
+        return visitor(*reinterpret_cast<Type*>(data));
+    } else if(Mid > n) {
+        return RuntimeChoose<Lo, std::max(Mid - 1, Lo), Ts...>::apply(n, data, visitor);
+    } else {
+        return RuntimeChoose<std::min(Mid + 1, Hi), Hi, Ts...>::apply(n, data, visitor);
+    }
+}
 
-// template </*typename T, */typename U>
-// std::enable_if_t</*HasOperatorLeftShift<T>::value && */HasOperatorLeftShift<U>::value, 
-// std::ostream&> operator<<(std::ostream &os, std::map<std::string, U> &map) {
-//     os << '{';
-//     if(map.size() > 0) {
-//         auto last = --map.end();
-//         for(auto it = map.begin(); it != last; ++it) os << '\"' << it->first << "\": " << it->second << ", ";
-//         os << '\"' << last->first << "\": " << last->second;
-//     }
-//     os << '}';
-//     return os;
-// }
-
+} // detail
 } // vsjson
 #endif

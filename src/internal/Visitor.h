@@ -4,9 +4,12 @@
 #include "TypeTraits.h"
 #include "VisitorHelper.h"
 namespace vsjson {
+namespace detail {
 
 template <typename ...Ts>
 class Variant;
+
+namespace visitor {
 
 // lhs = rhs
 template <typename ...Ts>
@@ -43,18 +46,18 @@ struct DeleteVisitor: public NoReturn {
 struct OsVisitor: public Return<std::ostream&> {
     std::ostream &_os;
     OsVisitor(std::ostream &os): _os(os) {}
-    
+
     template <typename T>
-    std::enable_if_t<HasOperatorLeftShift<T>::value, 
-    std::ostream&> operator()(T &obj) { 
+    std::enable_if_t<StreamSupport<T>::value,
+    std::ostream&> operator()(T &obj) {
         _os << obj;
         return _os;
     }
 
     template <typename T>
-    std::enable_if_t<!HasOperatorLeftShift<T>::value, 
-    std::ostream&> operator()(T &obj) { 
-        throw std::runtime_error("[type]" + std::string(typeid(obj).name()) 
+    std::enable_if_t<!StreamSupport<T>::value,
+    std::ostream&> operator()(T &obj) {
+        throw std::runtime_error("[type]" + std::string(typeid(obj).name())
             + " does not support IO");
         return _os;
     }
@@ -88,5 +91,7 @@ struct MovedConvertVisitor: public Return<U> {
     }
 };
 
+} // visitor
+} // detail
 } // vsjson
 #endif

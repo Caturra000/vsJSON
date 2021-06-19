@@ -17,7 +17,7 @@ public:
     template <size_t N>
     Json(const char (&str)[N]): _value(StringImpl(str)) {}
 
-    Json(bool b): _value(Boolean(b)) {}
+    Json(bool b): _value(BooleanImpl(b)) {}
     Json(nullptr_t): _value(NullImpl(nullptr)) {}
     Json(const std::string &str): _value(StringImpl(str)) {}
     Json(std::string &&str): _value(StringImpl(static_cast<std::string&&>(str))) {}
@@ -169,18 +169,18 @@ private:
 };
 
 template <>
-bool Json::is<bool>() const { return _value.is<BooleanImpl>(); }
+inline bool Json::is<bool>() const { return _value.is<BooleanImpl>(); }
 
 template <>
-bool Json::is<nullptr_t>() const { return _value.is<NullImpl>(); }
+inline bool Json::is<nullptr_t>() const { return _value.is<NullImpl>(); }
 
 template <>
-bool Json::is<std::string>() const { return _value.is<StringImpl>(); }
+inline bool Json::is<std::string>() const { return _value.is<StringImpl>(); }
 
 template <>
-std::string& Json::as<std::string>()  { return _value.get<StringImpl>(); }
+inline std::string& Json::as<std::string>()  { return _value.get<StringImpl>(); }
 
-std::ostream& operator<<(std::ostream &os, ArrayImpl &vec) {
+inline std::ostream& operator<<(std::ostream &os, ArrayImpl &vec) {
     os << '[';
     for(auto iter = vec.begin(); iter != vec.end(); ++iter) {
         os << *iter;
@@ -192,7 +192,7 @@ std::ostream& operator<<(std::ostream &os, ArrayImpl &vec) {
     return os;
 }
 
-std::ostream& operator<<(std::ostream &os, ObjectImpl &map) {
+inline std::ostream& operator<<(std::ostream &os, ObjectImpl &map) {
     os << '{';
     for(auto iter = map.begin(); iter != map.end(); ++iter) {
         os << '\"' << iter->first << "\":" << iter->second;

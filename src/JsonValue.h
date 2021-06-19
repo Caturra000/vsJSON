@@ -6,16 +6,16 @@
 namespace vsjson {
 
 class Json;
-using NullImpl = Null;
+using NullImpl = detail::Null;
 using ObjectImpl = std::map<std::string, Json>;
 using ArrayImpl = std::vector<Json>;
-using StringImpl = FormatString; //std::string;
+using StringImpl = detail::FormatString; //std::string;
 using IntegerImpl = int;
 using DecimalImpl = double;
-using BooleanImpl = Boolean;
+using BooleanImpl = detail::Boolean;
 
 using JsonValue =
-        Variant<NullImpl,
+detail::Variant<NullImpl,
                 ObjectImpl,
                 ArrayImpl,
                 StringImpl,

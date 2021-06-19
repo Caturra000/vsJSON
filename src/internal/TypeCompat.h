@@ -2,6 +2,7 @@
 #define __JSON_UTILS_TYPE_COMPAT_H__
 #include <bits/stdc++.h>
 namespace vsjson {
+namespace detail {
 
 struct Boolean {
     bool boolean;
@@ -38,12 +39,12 @@ struct FormatString: public std::string {
         rhs.swap(*this);
         return *this;
     }
-
     friend std::ostream& operator<<(std::ostream &os, FormatString &fs) {
         os << '\"' << static_cast<Base&>(fs) << '\"';
         return os;
     }
 };
 
+} // detail
 } // vsjson
 #endif
