@@ -9,8 +9,8 @@ namespace detail {
 // used for Variant::visit()
 template <int Lo, int Hi, typename ...Ts>
 struct RuntimeChoose {
-    template <typename Visitor>
-    static typename Visitor::ReturnType apply(int n, void *data, Visitor &visitor);
+    template <typename Visitor, typename R = typename std::decay_t<Visitor>::ReturnType>
+    static R apply(int n, void *data, Visitor &&visitor);
 };
 
 template <typename ...Ts>
@@ -41,8 +41,8 @@ public:
     template <typename T> T to() &&;
 
     template <typename Visitor,
-              typename R = typename Visitor::ReturnType>
-    R visit(Visitor &visitor);
+              typename R = typename std::decay_t<Visitor>::ReturnType>
+    R visit(Visitor &&visitor);
 
     void swap(Variant &rhs);
 
@@ -58,16 +58,16 @@ private:
 };
 
 template <int Lo, int Hi, typename ...Ts>
-template <typename Visitor>
-inline typename Visitor::ReturnType RuntimeChoose<Lo, Hi, Ts...>::apply(int n, void *data, Visitor &visitor) {
+template <typename Visitor, typename R>
+inline R RuntimeChoose<Lo, Hi, Ts...>::apply(int n, void *data, Visitor &&visitor) {
     constexpr int Mid = Lo + (Hi - Lo >> 1);
     if(Mid == n) {
         using Type = typename TypeAt<Mid, Ts...>::Type;
-        return visitor(*reinterpret_cast<Type*>(data));
+        return std::forward<Visitor>(visitor)(*reinterpret_cast<Type*>(data));
     } else if(Mid > n) {
-        return RuntimeChoose<Lo, std::max(Mid - 1, Lo), Ts...>::apply(n, data, visitor);
+        return RuntimeChoose<Lo, std::max(Mid - 1, Lo), Ts...>::apply(n, data, std::forward<Visitor>(visitor));
     } else {
-        return RuntimeChoose<std::min(Mid + 1, Hi), Hi, Ts...>::apply(n, data, visitor);
+        return RuntimeChoose<std::min(Mid + 1, Hi), Hi, Ts...>::apply(n, data, std::forward<Visitor>(visitor));
     }
 }
 
@@ -176,9 +176,9 @@ inline T Variant<Ts...>::to() && {
 
 template <typename ...Ts>
 template <typename Visitor, typename R>
-inline R Variant<Ts...>::visit(Visitor &visitor) {
+inline R Variant<Ts...>::visit(Visitor &&visitor) {
     return RuntimeChoose<0, sizeof...(Ts)-1, Ts...>
-        ::apply(_what, _handle, visitor);
+        ::apply(_what, _handle, std::forward<Visitor>(visitor));
 }
 
 // DO NOT IMPLEMENT operator= BY SWAP(swap for placement new buffer is wrong)
@@ -198,8 +198,7 @@ inline void Variant<Ts...>::init(T &&obj) {
 
 template <typename ...Ts>
 inline std::ostream& operator<<(std::ostream &os, Variant<Ts...> &variant) {
-    visitor::OsVisitor osv(os);
-    return variant.visit(osv);
+    return variant.visit(visitor::OsVisitor{os});
 }
 
 } // detail
