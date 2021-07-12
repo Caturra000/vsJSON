@@ -47,16 +47,14 @@ struct OsVisitor: public Return<std::ostream&> {
     std::ostream &_os;
     OsVisitor(std::ostream &os): _os(os) {}
 
-    template <typename T>
-    Require<StreamSupport<T>,
-    std::ostream&> operator()(T &obj) {
+    template <typename T, typename = Require<StreamSupport<T>>>
+    std::ostream& operator()(T &obj) {
         _os << obj;
         return _os;
     }
 
-    template <typename T>
-    RequireNot<StreamSupport<T>,
-    std::ostream&> operator()(T &obj) {
+    template <typename T, typename Tag = RequireNot<StreamSupport<T>>>
+    std::ostream& operator()(T &obj, Tag* = nullptr) {
         throw std::runtime_error("[type]" + std::string(typeid(obj).name())
             + " does not support IO");
         return _os;
@@ -65,12 +63,10 @@ struct OsVisitor: public Return<std::ostream&> {
 
 template <typename U>
 struct ConvertVisitor: public Return<U> {
-    template <typename T>
-    Require<std::is_convertible<T, U>,
-    U> operator()(T &obj) { return obj; }
-    template <typename T>
-    RequireNot<std::is_convertible<T, U>,
-    U> operator()(T &obj) {
+    template <typename T, typename = Require<std::is_convertible<T, U>>>
+    U operator()(T &obj) { return obj; }
+    template <typename T, typename Tag = RequireNot<std::is_convertible<T, U>>>
+    U operator()(T &obj, Tag* = nullptr) {
         throw std::runtime_error("[type]" + std::string(typeid(obj).name())
             + " does not support convert to [type]" + std::string(typeid(U).name()));
         return U{};
@@ -79,12 +75,10 @@ struct ConvertVisitor: public Return<U> {
 
 template <typename U>
 struct MovedConvertVisitor: public Return<U> {
-    template <typename T>
-    Require<std::is_convertible<T, U>,
-    U> operator()(T &obj) { return std::move(obj); }
-    template <typename T>
-    RequireNot<std::is_convertible<T, U>,
-    U> operator()(T &obj) {
+    template <typename T, typename = Require<std::is_convertible<T, U>>>
+    U operator()(T &obj) { return std::move(obj); }
+    template <typename T, typename Tag = RequireNot<std::is_convertible<T, U>>>
+    U operator()(T &obj, Tag* = nullptr) {
         throw std::runtime_error("[type]" + std::string(typeid(obj).name())
             + " does not support moved convert to [type]" + std::string(typeid(U).name()));
         return U{};

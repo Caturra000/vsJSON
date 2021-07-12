@@ -23,6 +23,7 @@ template <typename T, typename ...Ts>
 struct MaxSize {
     constexpr static size_t size = std::max(sizeof(T), MaxSize<Ts...>::size);
 };
+
 template <typename T>
 struct MaxSize<T> {
     constexpr static size_t size = sizeof(T);
@@ -52,15 +53,34 @@ struct StreamSupport {
     static bool const value = sizeof( test<T>( nullptr ) ) == sizeof( Success );
 };
 
+// logical and
+
+template <bool ...>
+struct And;
+
+template <bool ...bs>
+struct And<true, bs...>: public std::integral_constant<bool, And<bs...>::value> {};
+
+template <bool ...bs>
+struct And<false, bs...>: public std::integral_constant<bool, false> {};
+
+template <>
+struct And<true>: public std::integral_constant<bool, true> {};
+
+template <>
+struct And<false>: public std::integral_constant<bool, false> {};
+
 // require
 // make typename std::enable_if<blabla::value, T>::type shorter
 
-template <bool Cond, typename T = void>
-using RequireBool = std::enable_if_t<Cond, T>;
-template <typename Cond, typename T = void>
-using Require = RequireBool<Cond::value, T>;
-template <typename Cond, typename T = void>
-using RequireNot = RequireBool<!Cond::value, T>;
+template <bool ...Conds>
+using RequireBool = std::enable_if_t<And<Conds...>::value>;
+
+template <typename ...Conds>
+using Require = RequireBool<Conds::value...>;
+
+template <typename ...Conds>
+using RequireNot = RequireBool<(!Conds::value)...>;
 
 } // detail
 } // vsjson
