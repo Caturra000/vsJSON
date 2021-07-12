@@ -53,8 +53,8 @@ struct OsVisitor: public Return<std::ostream&> {
         return _os;
     }
 
-    template <typename T, typename Tag = RequireNot<StreamSupport<T>>>
-    std::ostream& operator()(T &obj, Tag* = nullptr) {
+    template <typename T, typename = RequireNot<StreamSupport<T>>>
+    std::ostream& operator()(T &obj, ...) {
         throw std::runtime_error("[type]" + std::string(typeid(obj).name())
             + " does not support IO");
         return _os;
@@ -65,8 +65,8 @@ template <typename U>
 struct ConvertVisitor: public Return<U> {
     template <typename T, typename = Require<std::is_convertible<T, U>>>
     U operator()(T &obj) { return obj; }
-    template <typename T, typename Tag = RequireNot<std::is_convertible<T, U>>>
-    U operator()(T &obj, Tag* = nullptr) {
+    template <typename T, typename = RequireNot<std::is_convertible<T, U>>>
+    U operator()(T &obj, ...) {
         throw std::runtime_error("[type]" + std::string(typeid(obj).name())
             + " does not support convert to [type]" + std::string(typeid(U).name()));
         return U{};
@@ -77,8 +77,8 @@ template <typename U>
 struct MovedConvertVisitor: public Return<U> {
     template <typename T, typename = Require<std::is_convertible<T, U>>>
     U operator()(T &obj) { return std::move(obj); }
-    template <typename T, typename Tag = RequireNot<std::is_convertible<T, U>>>
-    U operator()(T &obj, Tag* = nullptr) {
+    template <typename T, typename = RequireNot<std::is_convertible<T, U>>>
+    U operator()(T &obj, ...) {
         throw std::runtime_error("[type]" + std::string(typeid(obj).name())
             + " does not support moved convert to [type]" + std::string(typeid(U).name()));
         return U{};
