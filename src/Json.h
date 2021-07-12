@@ -66,7 +66,8 @@ public:
     // FIXME: use swap on operator=
     void swap(Json &rhs) { std::swap(*this, rhs); }
 
-    friend std::ostream& operator<<(std::ostream &os, vsjson::Json &json) { return os << json._value; }
+    friend std::ostream& operator<<(std::ostream &os, vsjson::Json &json);
+    friend std::ostream& operator<<(std::ostream &os, vsjson::Json &&json) { return os << json._value; }
 
 private:
     JsonValue _value;
@@ -212,6 +213,10 @@ inline std::ostream& operator<<(std::ostream &os, ObjectImpl &map) {
     }
     os << '}';
     return os;
+}
+
+inline std::ostream& operator<<(std::ostream &os, vsjson::Json &json) {
+    return operator<<(os, static_cast<Json&&>(json));
 }
 
 } // vsjson
